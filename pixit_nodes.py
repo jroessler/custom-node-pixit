@@ -5,6 +5,14 @@ import numpy as np
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 
+class AnyType(str):
+    """A special type that can be connected to any other types"""
+
+    def __ne__(self, __value: object) -> bool:
+        return False
+
+any_type = AnyType("*")
+
 
 class StringToCombo:
     @classmethod
@@ -17,7 +25,7 @@ class StringToCombo:
 
     RETURN_TYPES = ("COMBO",)
     FUNCTION = "string_to_combo"
-    CATEGORY = "My Custom Nodes"
+    CATEGORY = "Pixit Custom Nodes"
 
     def string_to_combo(self, input_string):
         options = [s.strip() for s in input_string.split(',')]
@@ -25,6 +33,34 @@ class StringToCombo:
             return (options[0],)
         else:
             return ("",)
+
+
+class SplitString:
+    @classmethod
+    def INPUT_TYPES(s):  
+    
+        return {"required": {
+                    "text": ("STRING", {"multiline": False, "default": "text"}),
+                },
+                "optional": {
+                    "delimiter": ("STRING", {"multiline": False, "default": ","}),
+                }            
+        }
+
+    RETURN_TYPES = (any_type, any_type, any_type, any_type, "STRING", )
+    RETURN_NAMES = ("string_1", "string_2", "string_3", "string_4", "show_help", )    
+    FUNCTION = "split"
+    CATEGORY = "Pixit Custom Nodes"
+
+    def split(self, text, delimiter=""):
+        # Split the text string
+        parts = text.split(delimiter)
+        strings = [part.strip() for part in parts[:4]]
+        string_1, string_2, string_3, string_4 = strings + [""] * (4 - len(strings))            
+
+        show_help = "https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes/wiki/Other-Nodes#cr-split-string"
+
+        return (string_1, string_2, string_3, string_4, show_help, )
 
 
 class SwitchBooleanString:
@@ -155,10 +191,12 @@ NODE_CLASS_MAPPINGS = {
     "StringToCombo": StringToCombo,
     "SwitchBooleanString": SwitchBooleanString,
     "ImageSave": ImageSave,
+    "SplitString": SplitString,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "StringToCombo": "String to Combo",
     "SwitchBooleanString": "Switch String",
     "ImageSave": "Pixit Image Save",
+    "SplitString": "Pixit Split String",
 }
