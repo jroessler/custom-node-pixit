@@ -64,7 +64,6 @@ class ImageSave:
                 "dpi": ("INT", {"default": 300, "min": 1, "max": 2400, "step": 1}),
                 "quality": ("INT", {"default": 95, "min": 1, "max": 100, "step": 1}),
                 "optimize_image": (["true", "false"],),
-                "embed_workflow": (["true", "false"],),
                 "prompt": ("STRING", {"default": "", "multiline": False}),
             },
         }
@@ -73,8 +72,7 @@ class ImageSave:
     FUNCTION = "save_images"
     OUTPUT_NODE = True 
 
-    def save_images(self, images, output_path='', filename_prefix="Pixit", filename_delimiter='_', extension='png', dpi=300, quality=95, optimize_image="true", prompt="", filename_number_padding=4, filename_number_start='false', embed_workflow="true"):
-        print("GOES INTO save_images")
+    def save_images(self, images, output_path='', filename_prefix="Pixit", filename_delimiter='_', extension='png', dpi=300, quality=95, optimize_image="true", prompt="", filename_number_padding=4, filename_number_start='false'):
         delimiter = filename_delimiter
         number_padding = filename_number_padding
         optimize_image = (optimize_image == "true")
@@ -104,20 +102,18 @@ class ImageSave:
 
         # Set Extension
         file_extension = '.' + extension
-        if file_extension not in ['png', 'jpg', 'jpeg', 'gif', 'tiff', 'bmp']:
-            print(f"The extension `{extension}` is not valid. The valid formats are: {', '.join(sorted(['png', 'jpg', 'jpeg', 'gif', 'tiff', 'webp', 'bmp']))}")
+        if file_extension not in ['.png', '.jpg', '.jpeg', '.gif', '.tiff', '.bmp']:
+            print(f"The extension `{extension}` is not valid. The valid formats are: {', '.join(sorted(['.png', '.jpg', '.jpeg', '.gif', '.tiff', '.bmp']))}")
             file_extension = ".png"
 
         output_files = list()
         for idx_img, image in enumerate(images):
-            print(f"IMAGE NUMBER: {idx_img}")
             i = 255. * image.cpu().numpy()
             img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
 
             metadata = PngInfo()
-            if embed_workflow == 'true':
-                if prompt.strip() != "":
-                    metadata.add_text("prompt", json.dumps(prompt))
+            if prompt.strip() != "":
+                metadata.add_text("prompt", json.dumps(prompt))
             exif_data = metadata
 
 
@@ -125,11 +121,7 @@ class ImageSave:
                 file = f"{counter:0{number_padding}}{delimiter}{filename_prefix}{file_extension}"
             else:
                 file = f"{filename_prefix}{delimiter}{counter:0{number_padding}}{file_extension}"
-            if os.path.exists(os.path.join(output_path, file)):
-                counter += 1
 
-            print(output_path)
-            print(file)
             # Save the images
             try:
                 output_file = os.path.abspath(os.path.join(output_path, file))
@@ -145,6 +137,7 @@ class ImageSave:
                     img.save(output_file, pnginfo=exif_data, optimize=optimize_image)
 
                 print(f"Image file saved to: {output_file}")
+                counter = counter + 1
                 output_files.append(output_file)
 
             except OSError as e:
