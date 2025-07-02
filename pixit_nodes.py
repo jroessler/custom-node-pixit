@@ -29,8 +29,6 @@ class CheckTensorAllZeros:
     CATEGORY = "Pixit Custom Nodes"
 
     def check_zeros(self, mask):
-        print(type(mask))
-        print(mask)
         is_zero_tensor = (mask == 0)
         is_all_zeros = is_zero_tensor.all().item()
         return (is_all_zeros,)
