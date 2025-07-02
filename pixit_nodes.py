@@ -2,6 +2,7 @@ import os
 import json
 import re
 import numpy as np
+import torch
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 
@@ -12,6 +13,27 @@ class AnyType(str):
         return False
 
 any_type = AnyType("*")
+
+
+class CheckTensorAllZeros:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "mask": ("MASK",),
+            }
+        }
+
+    RETURN_TYPES = ("BOOLEAN",)
+    FUNCTION = "check_zeros"
+    CATEGORY = "Pixit Custom Nodes"
+
+    def check_zeros(self, mask):
+        print(type(mask))
+        print(mask)
+        is_zero_tensor = (mask == 0)
+        is_all_zeros = is_zero_tensor.all().item()
+        return (is_all_zeros,)
 
 
 class StringToCombo:
@@ -192,6 +214,7 @@ NODE_CLASS_MAPPINGS = {
     "SwitchBooleanString": SwitchBooleanString,
     "ImageSave": ImageSave,
     "SplitString": SplitString,
+    "CheckTensorAllZeros": CheckTensorAllZeros,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -199,4 +222,5 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "SwitchBooleanString": "Switch String",
     "ImageSave": "Pixit Image Save",
     "SplitString": "Pixit Split String",
+    "CheckTensorAllZeros": "Pixit Check Tensor All Zeros"
 }
